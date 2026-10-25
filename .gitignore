@@ -1,0 +1,130 @@
+# ── Environment & Secrets ──────────────────────────────────────
+.env
+.env.*
+*.env
+!.env.example
+secrets.json
+service_account.json
+google-services.json
+
+# ── Python Backend ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# ── ML Models (Large Binary Files) ────────────────────────────
+*.h5
+*.pkl
+*.pt
+*.pth
+*.bin
+*.onnx
+*.tflite
+*.caffemodel
+*.pb
+model/
+models/
+
+# ── Flutter / Dart ─────────────────────────────────────────────
+# Build outputs
+agrishield_app/build/
+agrishield_app/.dart_tool/
+agrishield_app/.flutter-plugins
+agrishield_app/.flutter-plugins-dependencies
+agrishield_app/.pub-cache/
+agrishield_app/.pub/
+agrishield_app/pubspec.lock
+
+# iOS
+agrishield_app/ios/Pods/
+agrishield_app/ios/.symlinks/
+agrishield_app/ios/Flutter/.last_build_id
+agrishield_app/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# macOS
+agrishield_app/macos/Pods/
+agrishield_app/macos/.symlinks/
+agrishield_app/macos/Flutter/ephemeral/
+agrishield_app/macos/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Android
+agrishield_app/android/.gradle/
+agrishield_app/android/local.properties
+agrishield_app/android/key.properties
+agrishield_app/android/app/google-services.json
+agrishield_app/android/app/debug.keystore
+agrishield_app/android/app/release.keystore
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+agrishield_app/android/app/google-services.json
+agrishield_app/ios/Runner/GoogleService-Info.plist
+agrishield_app/firebase.json
+agrishield_app/.firebaserc
+
+# ── IDE / Editor ───────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# ── OS Files ───────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V8
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Data & Logs ───────────────────────────────────────────────
+*.log
+pglite-debug.log
+last_scan.json
+stored_crops/
+stored_soil/
+stored_fields/
+project_data/
+agrishield_backend/stored_crops/
+agrishield_backend/stored_soil/
+agrishield_backend/stored_fields/
+agrishield_backend/project_data/
+agrishield_backend/last_scan.json
+
+# ── Firebase Sensitive Configs ────────────────────────────────
+agrishield_app/lib/firebase_options.dart
+agrishield_app/firebase.json
+agrishield_app/.firebaserc
+
+# ── Twilio Source (contains credentials) ──────────────────────
+agrishield_twilio/
+agrishield_backend/agrishield_twilio/

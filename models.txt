@@ -1,0 +1,8 @@
+# Active Gemini Models (Google Gemini API)
+gemini-2.5-flash-lite (Active Primary: Fastest text & multimodal vision)
+gemini-3.1-flash-lite (Active Fallback: Ultra-fast secondary)
+gemini-3.5-flash-lite
+gemini-2.5-flash
+gemini-3.8-flash
+gemini-flash-latest
+gemini-flash-lite-latest
