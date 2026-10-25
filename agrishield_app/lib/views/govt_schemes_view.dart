@@ -7,6 +7,44 @@ import '../controllers/language_controller.dart';
 class GovtSchemesView extends StatelessWidget {
   const GovtSchemesView({super.key});
 
+  /// Launch a URL — works on Web, Android & iOS
+  static Future<void> _openLink(BuildContext context, String url) async {
+    if (url.isEmpty) return;
+    try {
+      final uri = Uri.parse(url);
+      // Try externalApplication first; fall back to platformDefault for web
+      bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        launched = await launchUrl(
+          uri,
+          mode: LaunchMode.platformDefault,
+        );
+      }
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Cannot open: $url'),
+            backgroundColor: const Color(0xFFE65100),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening link: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = Get.isRegistered<GovtSchemesController>()
@@ -111,7 +149,7 @@ class GovtSchemesView extends StatelessWidget {
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: c.filteredSchemes.length,
-                  itemBuilder: (ctx, i) => _schemeCard(c.filteredSchemes[i]),
+                  itemBuilder: (ctx, i) => _schemeCard(ctx, c.filteredSchemes[i]),
                 ),
               );
             }),
@@ -121,7 +159,7 @@ class GovtSchemesView extends StatelessWidget {
     );
   }
 
-  Widget _schemeCard(Map<String, dynamic> scheme) {
+  Widget _schemeCard(BuildContext context, Map<String, dynamic> scheme) {
     final title = scheme['title'] ?? 'N/A';
     final desc = scheme['description'] ?? '';
     final source = scheme['source'] ?? '';
@@ -143,140 +181,164 @@ class GovtSchemesView extends StatelessWidget {
           ),
         ],
       ),
-      child: InkWell(
-        onTap: () async {
-          if (link.isNotEmpty) {
-            final uri = Uri.parse(link);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
-          }
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title with icon
-              Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Card body (tappable to open link) ──
+          InkWell(
+            onTap: link.isNotEmpty ? () => _openLink(context, link) : null,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFE65100), Color(0xFFFF8F00)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Text('🏛️', style: TextStyle(fontSize: 22)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A237E),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Description
-              if (desc.isNotEmpty)
-                Text(
-                  desc,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700],
-                    height: 1.4,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              const SizedBox(height: 8),
-
-              // Benefit + Category badges
-              if (benefit.isNotEmpty || category.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Wrap(
-                    spacing: 8,
+                  // Title row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (category.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A237E).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFE65100), Color(0xFFFF8F00)],
                           ),
-                          child: Text(category, style: const TextStyle(fontSize: 10, color: Color(0xFF1A237E), fontWeight: FontWeight.w600)),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      if (benefit.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2E7D32).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                        child: const Center(
+                          child: Text('🏛️', style: TextStyle(fontSize: 22)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A237E),
                           ),
-                          child: Text('💰 $benefit', style: const TextStyle(fontSize: 10, color: Color(0xFF2E7D32), fontWeight: FontWeight.w600)),
                         ),
+                      ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 10),
 
-              // Footer: source + date
-              Row(
-                children: [
-                  if (source.isNotEmpty) ...[
-                    Icon(Icons.language, size: 14, color: Colors.grey[500]),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        source,
-                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                  if (date.isNotEmpty) ...[
-                    Icon(Icons.schedule, size: 14, color: Colors.grey[500]),
-                    const SizedBox(width: 4),
+                  // Description
+                  if (desc.isNotEmpty)
                     Text(
-                      date,
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                  ],
-                  const Spacer(),
-                  if (link.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE65100).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                      desc,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        height: 1.4,
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  const SizedBox(height: 8),
+
+                  // Benefit + Category badges
+                  if (benefit.isNotEmpty || category.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Wrap(
+                        spacing: 8,
                         children: [
-                          Text('View', style: TextStyle(fontSize: 11, color: Color(0xFFE65100), fontWeight: FontWeight.w600)),
-                          SizedBox(width: 4),
-                          Icon(Icons.open_in_new, size: 12, color: Color(0xFFE65100)),
+                          if (category.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A237E).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(category,
+                                  style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF1A237E),
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                          if (benefit.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2E7D32).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text('💰 $benefit',
+                                  style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF2E7D32),
+                                      fontWeight: FontWeight.w600)),
+                            ),
                         ],
                       ),
                     ),
+
+                  // Source + date
+                  Row(
+                    children: [
+                      if (source.isNotEmpty) ...[
+                        Icon(Icons.language, size: 14, color: Colors.grey[500]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            source,
+                            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      if (date.isNotEmpty) ...[
+                        Icon(Icons.schedule, size: 14, color: Colors.grey[500]),
+                        const SizedBox(width: 4),
+                        Text(
+                          date,
+                          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+
+          // ── "View on Govt Website" button (separate tappable row) ──
+          if (link.isNotEmpty)
+            InkWell(
+              onTap: () => _openLink(context, link),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE65100).withOpacity(0.07),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  border: Border(
+                    top: BorderSide(color: const Color(0xFFE65100).withOpacity(0.15)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.open_in_new_rounded, size: 15, color: Color(0xFFE65100)),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'View on Govt Website',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFE65100),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
